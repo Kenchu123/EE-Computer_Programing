@@ -1,0 +1,5 @@
+*.out
+.vscode/
+.DS_Store
+*.zip
+Paul Deitel, Harvey Deitel-C++ How to Program-Deitel (2017).pdf
