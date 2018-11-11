@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 using namespace std;
 
 int ctl, num[4];

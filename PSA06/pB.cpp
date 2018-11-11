@@ -11,19 +11,10 @@ int main()
 int num_of_ways(int n){
   //todo
     static int index = 0, total = 0, ans[15] = {0};
-    if (n >= 1) {
-        ans[index++] = 1;
-        num_of_ways(n - 1);
-        index -= 1;
-    }
-    if (n >= 2){
-        ans[index++] = 2;
-        num_of_ways(n - 2);
-        index -= 1;
-    }
-    if (n >= 3) {
-        ans[index++] = 3;
-        num_of_ways(n - 3);
+    if (n < 0) return 0;
+    for (int i = 1;i <= 3; i++) {
+        ans[index++] = i;
+        num_of_ways(n - i);
         index -= 1;
     }
     if (n == 0) {
