@@ -32,10 +32,9 @@ int main() {
         w_ptr[x2][y2] = tmp;
     }
     for (int i = 0;i < n; i++) {
-        for (int j = 0;j < ls[i] - 1; j++) {
-            cout << w_ptr[i][j] << " ";
+        for (int j = 0;j < ls[i]; j++) {
+            cout << w_ptr[i][j] << (j == ls[i] - 1 ? '\n' : ' ');
         }
-        cout << w_ptr[i][ls[i] - 1] << endl;
     }
     for (int i = 0;i < n; i++) delete [] w_ptr[i];
     delete w_ptr;
