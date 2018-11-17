@@ -3,25 +3,23 @@
 using namespace std;
 
 int n, m;
-int ls[1024];
+int *ls;
 char *s, *s_ptr;
-char **w_ptr[1024];
+char ***w_ptr;
 
 int main() {
     s = new char[W];
     s_ptr = s;
     cin >> n;
+    w_ptr = new char** [n];
+    ls = new int[n];
     for (int i = 0;i < n; i++) {
         cin >> ls[i];
         w_ptr[i] = new char*[ls[i]];
         for (int j = 0;j < ls[i]; j++) {
             w_ptr[i][j] = s_ptr;
-            char tmp[1024]; cin >> tmp;
-            int k = 0;
-            do {
-                s_ptr[0] = tmp[k];
-                s_ptr++, k++;
-            } while (tmp[k] != '\0');
+            cin >> s_ptr;
+            while (s_ptr[0] != '\0') s_ptr++;
             s_ptr++;
         }
     }
@@ -39,4 +37,8 @@ int main() {
         }
         cout << w_ptr[i][ls[i] - 1] << endl;
     }
+    for (int i = 0;i < n; i++) delete [] w_ptr[i];
+    delete w_ptr;
+    delete [] ls;
+    delete [] s;
 }
