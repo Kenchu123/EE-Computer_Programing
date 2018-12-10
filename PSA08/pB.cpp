@@ -40,18 +40,15 @@ class Polynomial{
 
   Polynomial multiply(Polynomial *poly2){
     //todo
-    Polynomial p_max, p_min, tmp;
-    if (this->deg > poly2->deg) p_max = *this, p_min = *poly2;
-    else p_max = *poly2, p_min = *this;
-
-    int new_deg = p_max.deg + p_min.deg - 1;
+    int new_deg = this->deg + poly2->deg - 1;
     int* new_num = new int [new_deg];
     for (int i = 0;i < new_deg; i++) new_num[i] = 0;
-    for (int i = 0;i < p_min.deg; i++) {
-        for (int j = 0;j < p_max.deg; j++) {
-            new_num[i + j] += p_min.num[i] * p_max.num[j];
+    for (int i = 0;i < this->deg; i++) {
+        for (int j = 0;j < poly2->deg; j++) {
+            new_num[i + j] += this->num[i] * poly2->num[j];
         }
     }
+    Polynomial tmp;
     tmp.init(new_num, new_deg);
     return tmp;
   }
