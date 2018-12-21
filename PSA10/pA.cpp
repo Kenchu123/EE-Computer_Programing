@@ -152,41 +152,6 @@ HugeInteger::~HugeInteger(){
 //PREPEND END
 
 //TEMPLATE BEGIN
-
-string stringReverse(string s) {
-    string re = "";
-    for (int i = s.size() - 1; i >= 0; i--) re += s[i];
-    return re;
-}
-
-string uintToString(uint64_t n) {
-    string s = "", re = "";
-    while (n != 0) {
-        s += char(n % 10 + '0');
-        n /= 10;
-    }
-    s = stringReverse(s);
-    if (s.size() == 19) return s;
-    for (int i = 0; i < 19 - s.size(); i++) re += '0';
-    re += s;
-    return re;
-}
-
-string HugeIntegerToString(int64_t length, uint64_t* data) {
-    string re = "";
-    int ind = 0;
-    for (int i = 0;i < length; i++) {
-        if (data[i] != 0) {
-            ind = i;
-            break;
-        }
-    }
-    for (int i = ind; i < length; i++) {
-        re += uintToString(data[i]);
-    }
-    return re;
-}
-
 HugeInteger HugeInteger::operator + (HugeInteger& n){
     // TODO 1
     this->resize(); n.resize();
@@ -194,20 +159,21 @@ HugeInteger HugeInteger::operator + (HugeInteger& n){
     if (a._sign == b._sign) {
         HugeInteger ans;
         uint64_t carry = 0;
-        for (int i = a._length - 1;i >= 0; i--) {
+        for (int i = a._length - 1; i >= 0; i--) {
             uint64_t a_d = a._data[i], b_d = b._data[i];
-            const uint64_t C = 1000000000000000000u;
-            uint64_t a_s = a_d % C, b_s = b_d % C; // 18 bit
-            uint64_t a_h = a_d / C, b_h = b_d / C; // head
-            uint64_t c_d = a_s + b_s + carry;
-            uint64_t c_h = a_h + b_h + c_d / C;
-            c_d %= C;
-            carry = 0;
-            if (c_h >= 10) {
+            uint64_t halfC = CARRY / 2;
+            a_d += carry;
+            bool overHalfC = 0;
+            if (a_d >= halfC) { a_d -= halfC; overHalfC = 1; }
+            else if (b_d >= halfC) { b_d -= halfC; overHalfC = 1;}
+            ans._data[i] = a_d + b_d;
+            if (ans._data[i] < halfC || overHalfC == 0) {
+                carry = 0;
+                if (overHalfC) ans._data[i] += halfC;
+            } else {
                 carry = 1;
-                c_h %= 10;
+                ans._data[i] -= halfC;
             }
-            ans._data[i] = c_d + c_h * C;
         }
         ans._sign = a._sign;
         return ans;
@@ -240,44 +206,25 @@ HugeInteger HugeInteger::operator - (HugeInteger& n){
         if (a._sign == 1) isMinus = 1;
         a.abs(), b.abs(); 
         HugeInteger ans;
-        string s1 = stringReverse(HugeIntegerToString(this->_length, this->_data)),
-                 s2 = stringReverse(HugeIntegerToString(n._length, n._data)), sub = "";
-        if (s1.size() < s2.size()) for (int i = s1.size(); i < s2.size(); i++) s1 += "0";
-        else if (s2.size() < s1.size()) for (int i = s2.size(); i < s1.size(); i++) s2 += "0";
-        int carry = 0;
-        if (a > b) { // a - b
-            for (int i = 0;i < s1.size(); i++) {
-                int ta = s1[i] - '0', tb = s2[i] - '0';
-                int tc = ta - tb - carry;
-                carry = 0;
-                if (tc < 0) {
-                    carry = 1;
-                    tc = 10 + tc;
-                }
-                sub += char(tc + '0');
-            }
-            // for (int i = a._length - 1; i >= 0; i--) {
-            //     uint64_t a_d = a._data[i], b_d = b._data[i];
-            //     if (a_d >= b_d) {
-            //         ans._data[i] = a_d - b_d;
-            //         continue;
-            //     }
-            //     else { // a_d < b_d
-
-            //     }
-            // }
-        }
-        else { //b - a
+        if (a < b) {
             sign = 1;
-            for (int i = 0;i < s1.size(); i++) {
-                int ta = s1[i] - '0', tb = s2[i] - '0';
-                int tc = tb - ta - carry;
+            HugeInteger tmp(a);
+            a = b;
+            b = tmp;
+        }
+         // a - b
+        int carry = 0;
+        for (int i = a._length - 1; i >= 0; i--) {
+            uint64_t a_d = a._data[i], b_d = b._data[i];
+            b_d += carry;
+            if (a_d >= b_d) {
+                ans._data[i] = a_d - b_d;
                 carry = 0;
-                if (tc < 0) {
-                    carry = 1;
-                    tc = 10 + tc;
-                }
-                sub += char(tc + '0');
+                continue;
+            }
+            else { // a_d < b_d + carry
+                ans._data[i] = CARRY - b_d + a_d;
+                carry = 1;
             }
         }
         ans._sign = sign;
