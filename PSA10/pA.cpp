@@ -156,23 +156,18 @@ HugeInteger HugeInteger::operator + (HugeInteger& n){
     // TODO 1
     this->resize(); n.resize();
     HugeInteger a(*this), b(n);
+    HugeInteger ans;
     if (a._sign == b._sign) {
-        HugeInteger ans;
-        uint64_t carry = 0;
+        int carry = 0;
         for (int i = a._length - 1; i >= 0; i--) {
-            uint64_t a_d = a._data[i], b_d = b._data[i];
-            uint64_t halfC = CARRY / 2;
-            a_d += carry;
-            bool overHalfC = 0;
-            if (a_d >= halfC) { a_d -= halfC; overHalfC = 1; }
-            else if (b_d >= halfC) { b_d -= halfC; overHalfC = 1;}
-            ans._data[i] = a_d + b_d;
-            if (ans._data[i] < halfC || overHalfC == 0) {
-                carry = 0;
-                if (overHalfC) ans._data[i] += halfC;
-            } else {
+            int a_d = a._data[i], b_d = b._data[i];
+            if (a_d >= CARRY - b_d - carry) {
+                ans._data[i] = a_d - (CARRY - b_d - carry);
                 carry = 1;
-                ans._data[i] -= halfC;
+            }
+            else {
+                ans._data[i] = a_d + b_d + carry;
+                carry = 0;
             }
         }
         ans._sign = a._sign;
@@ -201,13 +196,10 @@ HugeInteger HugeInteger::operator - (HugeInteger& n){
         return a + b;
     }
     else {
-        bool isMinus = 0;
-        bool sign = 0;
-        if (a._sign == 1) isMinus = 1;
-        a.abs(), b.abs(); 
         HugeInteger ans;
+        if (a < b) ans._sign = 1;
+        a.abs(), b.abs(); 
         if (a < b) {
-            sign = 1;
             HugeInteger tmp(a);
             a = b;
             b = tmp;
@@ -216,19 +208,15 @@ HugeInteger HugeInteger::operator - (HugeInteger& n){
         int carry = 0;
         for (int i = a._length - 1; i >= 0; i--) {
             uint64_t a_d = a._data[i], b_d = b._data[i];
-            b_d += carry;
-            if (a_d >= b_d) {
-                ans._data[i] = a_d - b_d;
+            if (a_d >= b_d + carry) {
+                ans._data[i] = a_d - b_d - carry;
                 carry = 0;
-                continue;
             }
             else { // a_d < b_d + carry
-                ans._data[i] = CARRY - b_d + a_d;
+                ans._data[i] = a_d + (CARRY - b_d - carry);
                 carry = 1;
             }
         }
-        ans._sign = sign;
-        if (isMinus) ans._sign = !ans._sign;
         return ans;
     }
 }
